@@ -1,8 +1,6 @@
+import minitorch
 import pytest
 from hypothesis import given
-
-import minitorch
-
 from .strategies import med_ints, small_floats
 
 # # Tests for module.py
@@ -16,7 +14,7 @@ from .strategies import med_ints, small_floats
 
 
 class ModuleA1(minitorch.Module):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.p1 = minitorch.Parameter(5)
         self.non_param = 10
@@ -25,25 +23,25 @@ class ModuleA1(minitorch.Module):
 
 
 class ModuleA2(minitorch.Module):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.p2 = minitorch.Parameter(10)
 
 
 class ModuleA3(minitorch.Module):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.c = ModuleA4()
 
 
 class ModuleA4(minitorch.Module):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.p3 = minitorch.Parameter(15)
 
 
 @pytest.mark.task0_4
-def test_stacked_demo() -> None:
+def test_stacked_demo():
     "Check that each of the properties match"
     mod = ModuleA1()
     np = dict(mod.named_parameters())
@@ -63,12 +61,12 @@ def test_stacked_demo() -> None:
 # These tests generate a stack of modules of varying sizes to check
 # properties.
 
-VAL_A = 50.0
-VAL_B = 100.0
+VAL_A = 50
+VAL_B = 100
 
 
 class Module1(minitorch.Module):
-    def __init__(self, size_a: int, size_b: int, val: float) -> None:
+    def __init__(self, size_a, size_b, val):
         super().__init__()
         self.module_a = Module2(size_a)
         self.module_b = Module2(size_b)
@@ -76,25 +74,25 @@ class Module1(minitorch.Module):
 
 
 class Module2(minitorch.Module):
-    def __init__(self, extra: int = 0) -> None:
+    def __init__(self, extra=0):
         super().__init__()
         self.parameter_a = minitorch.Parameter(VAL_A)
         self.parameter_b = minitorch.Parameter(VAL_B)
         self.non_parameter = 10
         self.module_c = Module3()
         for i in range(extra):
-            self.add_parameter(f"extra_parameter_{i}", 0)
+            self.add_parameter(f"extra_parameter_{i}", None)
 
 
 class Module3(minitorch.Module):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.parameter_a = minitorch.Parameter(VAL_A)
 
 
 @pytest.mark.task0_4
 @given(med_ints, med_ints)
-def test_module(size_a: int, size_b: int) -> None:
+def test_module(size_a, size_b):
     "Check the properties of a single module"
     module = Module2()
     module.eval()
@@ -110,12 +108,12 @@ def test_module(size_a: int, size_b: int) -> None:
     named_parameters = dict(module.named_parameters())
     assert named_parameters["parameter_a"].value == VAL_A
     assert named_parameters["parameter_b"].value == VAL_B
-    assert named_parameters["extra_parameter_0"].value == 0
+    assert named_parameters["extra_parameter_0"].value is None
 
 
 @pytest.mark.task0_4
 @given(med_ints, med_ints, small_floats)
-def test_stacked_module(size_a: int, size_b: int, val: float) -> None:
+def test_stacked_module(size_a, size_b, val):
     "Check the properties of a stacked module"
     module = Module1(size_a, size_b, val)
     module.eval()
@@ -143,19 +141,19 @@ def test_stacked_module(size_a: int, size_b: int, val: float) -> None:
 
 
 class ModuleRun(minitorch.Module):
-    def forward(self) -> int:
+    def forward(self):
         return 10
 
 
 @pytest.mark.task0_4
 @pytest.mark.xfail
-def test_module_fail_forward() -> None:
+def test_module_fail_forward():
     mod = minitorch.Module()
     mod()
 
 
 @pytest.mark.task0_4
-def test_module_forward() -> None:
+def test_module_forward():
     mod = ModuleRun()
     assert mod.forward() == 10
 
@@ -167,14 +165,14 @@ def test_module_forward() -> None:
 
 
 class MockParam:
-    def __init__(self) -> None:
+    def __init__(self):
         self.x = False
 
-    def requires_grad_(self, x: bool) -> None:
+    def requires_grad_(self, x):
         self.x = x
 
 
-def test_parameter() -> None:
+def test_parameter():
     t = MockParam()
     q = minitorch.Parameter(t)
     print(q)
